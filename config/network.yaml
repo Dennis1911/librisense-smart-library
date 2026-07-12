@@ -1,0 +1,80 @@
+# LibriSense network inventory — committed for reproducibility.
+# Updated whenever IPs/MACs change.
+
+network:
+  router: NEW router + ISP since 2026-06-10
+  subnet: 192.168.2.0/24
+  gateway: 192.168.2.1
+  notes: |
+    UPDATE 2026-06-10: new router + internet provider. Subnet moved
+    192.168.0.x -> 192.168.2.x, so all old hardcoded IPs are dead.
+    Two big improvements on the new router:
+      1. mDNS/Bonjour works — `librisense-core.local` resolves from the
+         Mac. USE HOSTNAMES, not IPs, everywhere (ssh config + broker URL)
+         so a DHCP change never breaks us again.
+      2. NO WLAN client isolation — wireless clients can reach each other.
+         So WiFi-only operation is viable now (old router blocked this).
+    The new router apparently kept the same SSID/password, so the Pis
+    auto-rejoined over WiFi without reconfiguration.
+
+    RECOMMENDED: set a DHCP reservation for the Core Pi on the new router
+    (so the broker IP is stable), or just rely on librisense-core.local.
+
+nodes:
+  core:
+    hostname: librisense-core
+    hardware: Raspberry Pi 5
+    os: Debian 13 Trixie (Raspberry Pi OS, 64-bit, Lite)
+    sd_card: 64 GB
+    mdns: librisense-core.local   # preferred — survives DHCP changes
+    ip_current: 192.168.2.37      # WiFi lease on the new router (2026-06-10), may change
+    mac_eth: 88:a2:9e:83:29:a0
+    mac_wlan: 88:a2:9e:83:29:a1
+    role: broker + processing + planner + execution + dashboard
+    ssh_alias: librisense-core
+    addressing_note: |
+      Reach via librisense-core.local. Old 192.168.0.183 is dead (router
+      change). Currently on WiFi (Ethernet not plugged into new router).
+    setup_status: |
+      DONE (2026-05-30): OS updated; passwordless sudo; Mosquitto 2.0.21
+      on 0.0.0.0:1883; repo cloned at ~/librisense via read-write deploy
+      key; Python venv (.venv) with requirements-core.txt; Node 20 / npm 9;
+      Fast Downward built at ~/fast-downward (release). MQTT round-trip and
+      planner both verified.
+
+  edge:
+    hostname: librisense-edge
+    hardware: Raspberry Pi 3 Model B Plus Rev 1.3
+    os: Raspberry Pi OS Lite (64-bit, Debian 13 Trixie)
+    sd_card: 32 GB
+    mdns: librisense-edge.local   # preferred — survives DHCP changes
+    ip_current: 192.168.2.38      # WiFi lease on the new router (2026-06-10), may change
+    mac_eth: b8:27:eb:e6:c8:7f
+    role: GrovePi+ sensors + actuators + Plugwise USB
+    ssh_alias: librisense-edge
+    addressing_note: |
+      Reach via librisense-edge.local. On WiFi (2.4 GHz only on Pi 3 B+).
+      After the router change the Pi 3 kept dropping its WiFi (WPA3 /
+      band-steering on 2.4 GHz); fixed router-side, now stable. End-to-end
+      MQTT Edge -> Core (librisense-core.local) re-verified 2026-06-10.
+    setup_status: |
+      DONE (2026-05-30): OS updated; passwordless sudo; cloud-init disabled
+      + hostname fixed to librisense-edge (Imager kept reverting it to
+      -core via cloud-init); I2C + SPI enabled, user in i2c/gpio/spi groups;
+      repo cloned at ~/librisense via read-write deploy key; Python venv
+      (.venv) with requirements-edge.txt (paho-mqtt, pyyaml, smbus2,
+      grovepi 1.0.4 w/ RPi.GPIO, python-plugwise 2.0.2).
+      END-TO-END MQTT Edge -> Core broker VERIFIED.
+    pending_physical:
+      - Mount GrovePi+ shield on the 40-pin header (I2C 0x04 not yet present)
+      - Plug in Grove sensors per modules/iot socket map
+      - Plug Plugwise USB stick + pair the 2 Circles
+    note_plugwise: |
+      python-plugwise 2.0.2 is the HA gateway library (Smile/Adam). The USB
+      Stick + Circle protocol may need the older 'plugwise' serial library
+      instead — verify during actuator bring-up in Sprint 1.
+
+mac_workstation:
+  hostname: mbp-von-dennis
+  ip_wlan: 192.168.0.165
+  role: developer workstation (Dennis)

@@ -1,0 +1,12 @@
+# Edge node (Raspberry Pi 3 B+) Python dependencies.
+# Module: iot (sensor drivers, actuator drivers, MQTT bridge).
+#   python3 -m venv .venv && .venv/bin/pip install -r requirements-edge.txt
+#
+# NOTE: grovepi only works on the Pi itself (talks to /dev/i2c-*). Do not
+# install on the Core node or a dev laptop.
+
+paho-mqtt>=2.0        # MQTT client
+pyyaml>=6.0           # config loading
+smbus2>=0.4           # I2C access for GrovePi sensors
+grovepi               # GrovePi+ sensor/actuator library (Pi-only)
+python-plugwise>=0.27 # Plugwise Circle smart-switch control (USB stick)

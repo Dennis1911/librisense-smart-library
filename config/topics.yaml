@@ -1,0 +1,29 @@
+# MQTT topic map for LibriSense.
+# Single source of truth — every module imports from here, no hard-coded strings.
+
+broker:
+  # The Mosquitto broker runs on the Core Pi. Primary address is its mDNS
+  # hostname (works on the home WiFi, IP-independent). Fallbacks cover the
+  # self-hosted hotspot mode (Core AP = 10.42.0.1, used at the uni demo where
+  # .local/mDNS does not traverse the AP) and the Core's own localhost.
+  host: librisense-core.local
+  fallback_hosts:
+    - 10.42.0.1        # Core when it is the WiFi access point (hotspot mode)
+    - 127.0.0.1        # Core-local services
+  port: 1883
+  client_id_prefix: librisense
+
+topics:
+  sensors:        library/sensors/+        # wildcards: temperature, humidity, light, sound, motion, co2, session, weather
+  state:          library/state
+  problem:        library/problem
+  plan:           library/plan
+  actions:        library/actions
+  overrides:      library/overrides
+
+# JSON payload schema notes (informal — formalise in module 2 when stable):
+#   sensors/<type>: { ts: ISO-8601, zone: str, value: number|bool, unit: str }
+#   state:          { ts, zones: {z: {temp, rh, lux, db, occ, co2}}, users: {u: {phase, session_minutes}} }
+#   plan:           { ts, actions: [{name, params, start, end, expected_effects}] }
+#   actions:        { action, params, deadline }
+#   overrides:      { ts, target, value, ttl_s }

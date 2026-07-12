@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LibriSense — Live</title>
+<script src="/static/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:     #0f1419;
+    --card:   #1a2230;
+    --card2:  #222c3d;
+    --txt:    #e6edf3;
+    --muted:  #8b98a9;
+    --accent: #4cc2ff;
+    --good:   #3fb950;
+    --warn:   #d29922;
+    --bad:    #f85149;
+    --border: #2a3548;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--txt); padding: 24px;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+
+  /* ── Header ── */
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  h1 { font-size: 22px; font-weight: 600; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%;
+         background: var(--bad); box-shadow: 0 0 8px var(--bad); transition: all .3s; }
+  .dot.live { background: var(--good); box-shadow: 0 0 8px var(--good); }
+
+  /* ── Cards & grid ── */
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px;
+  }
+  .card h2 {
+    font-size: 12px; text-transform: uppercase; letter-spacing: .6px;
+    color: var(--muted); margin-bottom: 16px; font-weight: 600;
+  }
+  .row   { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .grid  { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+           gap: 16px; margin-bottom: 16px; }
+
+  /* ── Metric rows ── */
+  .metric { display: flex; justify-content: space-between; align-items: baseline;
+            padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .metric:last-child { border-bottom: none; }
+  .metric .label { color: var(--muted); font-size: 14px; }
+  .metric .value { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .big { font-size: 46px; font-weight: 700; text-align: center; margin: 8px 0; }
+  .pill { display: inline-block; padding: 4px 12px; border-radius: 999px;
+          font-size: 13px; font-weight: 600; }
+  .pill.on  { background: rgba(63,185,80,.15);   color: var(--good); }
+  .pill.off { background: rgba(139,152,169,.15); color: var(--muted); }
+  .bar { height: 8px; background: var(--border); border-radius: 999px;
+         overflow: hidden; margin-top: 6px; }
+  .bar > span { display: block; height: 100%; background: var(--accent); transition: width .4s; }
+  .zonecard .occ { text-align: center; margin-bottom: 14px; }
+  .ts { color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+  /* ── Plan card ── */
+  .plancard { grid-column: 1 / -1; }
+  .step { display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+          background: var(--card2); border-radius: 8px; margin-bottom: 6px; }
+  .step .n { width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+             color: #06121d; font-weight: 700; font-size: 12px;
+             display: flex; align-items: center; justify-content: center; }
+  .step .act { font-family: ui-monospace, Menlo, monospace; font-size: 14px; }
+  .planmeta { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+  .empty { color: var(--muted); font-style: italic; }
+  .chip { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px;
+          background: rgba(76,194,255,.15); color: var(--accent); margin-left: 6px; }
+
+  /* ── Heatmap SVG ── */
+  #heatmap { width: 100%; height: auto; display: block; min-height: 120px; }
+
+  /* ── Pomodoro rings ── */
+  .rings-wrap {
+    display: flex; flex-wrap: wrap; gap: 24px;
+    justify-content: center; align-items: center; min-height: 160px;
+  }
+  .ring-item  { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .ring-name  { font-size: 13px; font-weight: 600; }
+  .ring-badge { font-size: 11px; padding: 2px 9px; border-radius: 999px; font-weight: 600; }
+  .phase-focused   { background: rgba(63,185,80,.2);   color: var(--good); }
+  .phase-break-due { background: rgba(210,153,34,.2);  color: var(--warn); }
+  .phase-on-break  { background: rgba(76,194,255,.2);  color: var(--accent); }
+  .phase-idle      { background: rgba(139,152,169,.12); color: var(--muted); }
+
+  /* ── Trend charts ── */
+  .chart-row  { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .chart-item { display: flex; flex-direction: column; gap: 6px; }
+  .chart-lbl  { font-size: 11px; color: var(--muted); text-transform: uppercase;
+                letter-spacing: .4px; }
+  .chart-wrap { position: relative; height: 140px; }
+
+  @media (max-width: 720px) {
+    .row       { grid-template-columns: 1fr; }
+    .chart-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- Header -->
+<header>
+  <div class="dot" id="conn"></div>
+  <div>
+    <h1>LibriSense <span class="sub">— Adaptive Smart Library</span></h1>
+    <div class="sub" id="status">connecting…</div>
+  </div>
+</header>
+
+<!-- Row 1: Heatmap + Pomodoro -->
+<div class="row" style="margin-bottom:16px;">
+
+  <div class="card">
+    <h2>Floor Plan · Seat Heatmap</h2>
+    <svg id="heatmap" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
+      <text x="200" y="85" text-anchor="middle" fill="#4a5568"
+            font-size="13" font-family="system-ui">Waiting for zone data…</text>
+    </svg>
+  </div>
+
+  <div class="card">
+    <h2>Learner Sessions · Pomodoro</h2>
+    <div class="rings-wrap" id="rings">
+      <div style="color:var(--muted);font-style:italic;font-size:13px;">
+        Waiting for learner data…
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Row 2: Trend Charts -->
+<div class="card" style="margin-bottom:16px;">
+  <h2>Recent Trends <span style="font-weight:400;font-size:10px;">(last ~30 min, sampled every 10 s)</span></h2>
+  <div class="chart-row">
+    <div class="chart-item">
+      <div class="chart-lbl">Light %</div>
+      <div class="chart-wrap"><canvas id="chart-light"></canvas></div>
+    </div>
+    <div class="chart-item">
+      <div class="chart-lbl">CO₂ ppm</div>
+      <div class="chart-wrap"><canvas id="chart-co2"></canvas></div>
+    </div>
+    <div class="chart-item">
+      <div class="chart-lbl">Comfort index</div>
+      <div class="chart-wrap"><canvas id="chart-comfort"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- Row 3: Zone cards + weather + plan (dynamic) -->
+<div class="grid" id="grid">
+  <div class="card"><h2>Waiting for data…</h2></div>
+</div>
+<div class="ts" id="ts"></div>
+
+</div><!-- /wrap -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// Helpers
+// ═══════════════════════════════════════════════════════════════
+function co2Color(ppm) {
+  return ppm < 800 ? 'var(--good)' : ppm < 1200 ? 'var(--warn)' : 'var(--bad)';
+}
+function comfortFill(c) {
+  return c > 0.75 ? '#3fb950' : c > 0.5 ? '#d29922' : '#f85149';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Heatmap — dynamic seat grid, one cell per zone
+// ═══════════════════════════════════════════════════════════════
+const SEAT_W = 110, SEAT_H = 88, GAP = 14, PAD = 16;
+const COLS   = 3;   // seats per row
+
+function buildHeatmap(zones) {
+  const entries = Object.entries(zones);
+  if (!entries.length) return;
+
+  const cols   = Math.min(entries.length, COLS);
+  const rows   = Math.ceil(entries.length / cols);
+  const gridW  = cols * SEAT_W + (cols - 1) * GAP;
+  // Never narrower than the legend needs — with a single zone the canvas
+  // would otherwise be ~142px wide and the fixed-position legend overlapped.
+  const svgW   = Math.max(PAD * 2 + gridW, 330);
+  const xOff   = (svgW - gridW) / 2;               // centre the seat grid
+  const svgH   = PAD * 2 + rows * SEAT_H + (rows - 1) * GAP + 22; // +22 for legend
+
+  let html = '';
+
+  // Room outline
+  html += `<rect x="0" y="0" width="${svgW}" height="${svgH - 22}"
+    rx="8" fill="#0d1117" stroke="#2a3548" stroke-width="1.5"/>`;
+
+  // Windows on the top wall: three slats that light up while the planner
+  // ventilates (real zones only carry the "ventilating" flag).
+  const venting = Object.values(zones).some(z => z.ventilating);
+  const winCol  = venting ? '#4cc2ff' : '#2a3548';
+  const winW    = Math.min(46, (svgW - 80) / 3);
+  [0.25, 0.5, 0.75].forEach(f => {
+    html += `<rect x="${svgW * f - winW / 2}" y="-2" width="${winW}" height="5"
+      rx="2.5" fill="${winCol}" style="transition:fill .5s"/>`;
+  });
+  if (venting) {
+    html += `<text x="${svgW / 2}" y="12" text-anchor="middle" fill="#4cc2ff"
+      font-size="8" font-family="system-ui">windows open · airing</text>`;
+  }
+
+  entries.forEach(([name, z], i) => {
+    const col  = i % cols;
+    const row  = Math.floor(i / cols);
+    const x    = xOff + col * (SEAT_W + GAP);
+    const y    = PAD + row * (SEAT_H + GAP);
+    const occ  = z.occupied;
+    const c    = z.comfort ?? 0.5;
+    const color = occ ? comfortFill(c) : null;
+
+    // Desk background
+    html += `<rect x="${x}" y="${y + 18}" width="${SEAT_W}" height="${SEAT_H - 22}"
+      rx="6" fill="${occ ? color + '28' : '#1a2230'}"
+      stroke="${occ ? color : '#2a3548'}" stroke-width="1.5"
+      style="transition:fill .5s,stroke .5s"/>`;
+
+    // Person icon (circle = head, small rect = body)
+    if (occ) {
+      html += `<circle cx="${x + SEAT_W / 2}" cy="${y + 12}" r="9"
+        fill="${color}" fill-opacity="0.9"
+        style="transition:fill .5s"/>`;
+      html += `<circle cx="${x + SEAT_W / 2}" cy="${y + 9}" r="3.5"
+        fill="#0d1117" fill-opacity="0.35"/>`;
+    } else {
+      // Empty seat silhouette
+      html += `<circle cx="${x + SEAT_W / 2}" cy="${y + 12}" r="9"
+        fill="#2a3548"/>`;
+      html += `<text x="${x + SEAT_W / 2}" y="${y + 17}" text-anchor="middle"
+        fill="#4a5568" font-size="10" font-family="system-ui">—</text>`;
+    }
+
+    // Zone label
+    const label = name.replace('reading-', 'R-').replace('seat-', 'S-');
+    html += `<text x="${x + SEAT_W / 2}" y="${y + SEAT_H - 8}" text-anchor="middle"
+      fill="${occ ? '#c9d1d9' : '#4a5568'}" font-size="10"
+      font-family="system-ui" font-weight="500">${label}</text>`;
+
+    // Comfort mini-bar
+    if (occ) {
+      const bW = SEAT_W - 24, bX = x + 12, bY = y + SEAT_H - 18;
+      html += `<rect x="${bX}" y="${bY}" width="${bW}" height="3" rx="1.5" fill="#2a3548"/>`;
+      html += `<rect x="${bX}" y="${bY}" width="${Math.round(bW * c)}" height="3"
+        rx="1.5" fill="${color}" style="transition:width .5s"/>`;
+    }
+
+    // CO₂ badge (top-right of desk, only if occupied)
+    if (occ && z.co2_ppm != null) {
+      const badgeColor = z.co2_ppm > 1200 ? '#f85149' : z.co2_ppm > 800 ? '#d29922' : '#3fb950';
+      html += `<text x="${x + SEAT_W - 4}" y="${y + 30}" text-anchor="end"
+        fill="${badgeColor}" font-size="8" font-family="system-ui"
+        font-variant-numeric="tabular-nums">${z.co2_ppm}</text>`;
+    }
+  });
+
+  // Legend (below room) — flow layout: items placed sequentially with
+  // estimated text widths, so nothing overlaps at any canvas width.
+  const ly = svgH - 14;
+  const legend = [
+    ['#3fb950', 'good'],
+    ['#d29922', 'ok'],
+    ['#f85149', 'poor comfort'],
+    ['#2a3548', 'empty seat'],
+  ];
+  let lx = PAD;
+  legend.forEach(([col, label]) => {
+    html += `
+      <circle cx="${lx}" cy="${ly}" r="4" fill="${col}"/>
+      <text x="${lx + 8}" y="${ly + 4}" fill="#8b98a9" font-size="9"
+        font-family="system-ui">${label}</text>`;
+    lx += 8 + label.length * 5.2 + 16;   // dot + text estimate + gap
+  });
+
+  const svg = document.getElementById('heatmap');
+  svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
+  svg.innerHTML = html;
+}
+
+function updateHeatmap(zones) {
+  buildHeatmap(zones);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Pomodoro rings
+// ═══════════════════════════════════════════════════════════════
+const POMODORO_TOTAL = 25;
+const BREAK_TOTAL    = 5;
+const PHASE_COLOR = {
+  'focused':    '#3fb950',
+  'break-due':  '#d29922',
+  'on-break':   '#4cc2ff',
+  'idle':       '#2a3548',
+};
+const PHASE_LABEL = {
+  'focused':    'Focused',
+  'break-due':  'Break due!',
+  'on-break':   'On break',
+  'idle':       'Idle',
+};
+
+function ringSVG(userId, user) {
+  const phase = user.phase || 'idle';
+  const mins  = user.session_minutes || 0;
+  const total = phase === 'on-break' ? BREAK_TOTAL : POMODORO_TOTAL;
+  const pct   = Math.min(mins / total, 1);
+  const r = 42, cx = 54, cy = 54, circ = 2 * Math.PI * r;
+  const color = PHASE_COLOR[phase] || '#2a3548';
+  const offset = circ * (1 - pct);
+  const phaseClass = 'phase-' + phase;
+  return `
+    <div class="ring-item">
+      <svg width="108" height="108" viewBox="0 0 108 108">
+        <!-- track -->
+        <circle cx="${cx}" cy="${cy}" r="${r}"
+                fill="none" stroke="#2a3548" stroke-width="8"/>
+        <!-- progress -->
+        <circle cx="${cx}" cy="${cy}" r="${r}"
+                fill="none" stroke="${color}" stroke-width="8"
+                stroke-linecap="round"
+                stroke-dasharray="${circ.toFixed(1)}"
+                stroke-dashoffset="${offset.toFixed(1)}"
+                transform="rotate(-90 ${cx} ${cy})"
+                style="transition: stroke-dashoffset .6s ease, stroke .4s"/>
+        <!-- centre text -->
+        <text x="${cx}" y="${cy - 7}" text-anchor="middle" dominant-baseline="middle"
+              fill="#e6edf3" font-size="18" font-weight="700" font-family="system-ui">
+          ${mins}
+        </text>
+        <text x="${cx}" y="${cy + 13}" text-anchor="middle" dominant-baseline="middle"
+              fill="#8b98a9" font-size="9" font-family="system-ui">/ ${total} min</text>
+      </svg>
+      <div class="ring-name">${userId}</div>
+      <div class="ring-badge ${phaseClass}">${PHASE_LABEL[phase] || phase}</div>
+    </div>`;
+}
+
+function updateRings(users) {
+  const el = document.getElementById('rings');
+  if (!users || !Object.keys(users).length) {
+    el.innerHTML = '<div style="color:var(--muted);font-style:italic;font-size:13px;">No active learners</div>';
+    return;
+  }
+  el.innerHTML = Object.entries(users).map(([id, u]) => ringSVG(id, u)).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Trend Charts
+// ═══════════════════════════════════════════════════════════════
+Chart.defaults.color       = '#8b98a9';
+Chart.defaults.borderColor = '#2a3548';
+
+const MAX_PTS     = 180;   // ~30 min at 10-s intervals
+const SAMPLE_EVERY = 20;   // WS messages (20 × 0.5 s = 10 s)
+let   sampleTick  = 0;
+
+const history = { labels: [], light: [], co2: [], comfort: [] };
+
+function makeChart(canvasId, dataKey, color, yMin, yMax) {
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  return new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: history.labels,
+      datasets: [{
+        data: history[dataKey],
+        borderColor: color,
+        backgroundColor: color + '22',
+        borderWidth: 2,
+        pointRadius: 0,
+        tension: 0.4,
+        fill: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+      scales: {
+        x: { display: false },
+        y: {
+          min: yMin, max: yMax,
+          grid: { color: '#2a354860' },
+          ticks: { font: { size: 10 }, maxTicksLimit: 5 },
+        }
+      }
+    }
+  });
+}
+
+const charts = {
+  light:   makeChart('chart-light',   'light',   '#4cc2ff', 0,    100),
+  co2:     makeChart('chart-co2',     'co2',     '#d29922', 300,  2000),
+  comfort: makeChart('chart-comfort', 'comfort', '#3fb950', 0,    1),
+};
+
+function pushTrend(z) {
+  if (++sampleTick % SAMPLE_EVERY !== 0) return;
+  const label = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  history.labels.push(label);
+  history.light.push(z.light_pct);
+  history.co2.push(z.co2_ppm);
+  history.comfort.push(z.comfort);
+  if (history.labels.length > MAX_PTS) {
+    ['labels','light','co2','comfort'].forEach(k => history[k].shift());
+  }
+  Object.values(charts).forEach(c => c.update('none'));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Zone / weather / plan cards (unchanged logic)
+// ═══════════════════════════════════════════════════════════════
+function zoneCard(name, z) {
+  return `<div class="card zonecard">
+    <h2>Zone · ${name}</h2>
+    <div class="occ"><span class="pill ${z.occupied ? 'on':'off'}">${z.occupied ? '● occupied' : '○ empty'}</span></div>
+    <div class="metric">
+      <span class="label">Light</span>
+      <span class="value">${z.light_pct}%</span>
+    </div>
+    <div class="bar"><span style="width:${z.light_pct}%"></span></div>
+    <div class="metric">
+      <span class="label">CO₂ (sim.)</span>
+      <span class="value" style="color:${co2Color(z.co2_ppm)}">${z.co2_ppm} ppm</span>
+    </div>
+    <div class="metric">
+      <span class="label">Comfort</span>
+      <span class="value" style="color:${comfortFill(z.comfort)}">${Math.round(z.comfort * 100)}%</span>
+    </div>
+    ${z.ventilating === undefined ? '' : `<div class="metric">
+      <span class="label">Window</span>
+      <span class="value" style="font-size:14px;color:${z.ventilating ? 'var(--accent)' : 'var(--muted)'}">${z.ventilating ? 'open · airing' : 'closed'}</span>
+    </div>`}
+    <div class="bar"><span style="width:${z.comfort * 100}%; background:${comfortFill(z.comfort)}"></span></div>
+  </div>`;
+}
+
+function outdoorCard(o) {
+  if (!o || o.outdoor_temp_c == null) return '';
+  return `<div class="card">
+    <h2>Outdoor · Weather</h2>
+    <div class="big">${o.outdoor_temp_c}°C</div>
+    <div class="metric"><span class="label">Humidity</span><span class="value">${o.humidity_pct}%</span></div>
+    <div class="metric"><span class="label">Cloud cover</span><span class="value">${o.cloud_cover_pct}%</span></div>
+  </div>`;
+}
+
+const ACT_LABEL = {
+  turn_on_lamp:         '💡 turn on reading lamp',
+  turn_off_lamp:        '🌙 turn off lamp (save energy)',
+  ventilate:            '🌬️ ventilate (clear CO₂)',
+  full_ventilate:       '🌬️ full airing (clear CO₂)',
+  pulse_ventilate:      '💨 pulse ventilation (gentle)',
+  pulse_ventilate_step: '💨 pulse ventilation (CO₂ ↓ one band)',
+  suggest_break:        '☕ suggest a break',
+};
+
+function planCard(plan, actuators) {
+  const actions = (plan && plan.actions) || [];
+  const status  = plan && plan.status;
+  const lamp    = actuators && actuators.lamp;
+  const lampTxt = lamp ? (lamp.on ? 'lamp ON' : 'lamp OFF') : 'lamp —';
+  let meta = '';
+  if (status) {
+    meta = `status: <b>${status}</b>`;
+    if (plan.cost    != null) meta += ` · cost ${plan.cost}`;
+    if (plan.solve_ms != null) meta += ` · solved in ${plan.solve_ms} ms`;
+    meta += ` <span class="chip">${lampTxt}</span>`;
+  }
+  const body = actions.length
+    ? actions.map((a, i) =>
+        `<div class="step">
+           <span class="n">${i + 1}</span>
+           <span class="act">${ACT_LABEL[a.name] || a.name}(${a.args.join(', ')})</span>
+         </div>`).join('')
+    : `<div class="empty">No action needed — environment already optimal.</div>`;
+  return `<div class="card plancard">
+    <h2>AI Planner · Current Plan</h2>
+    <div class="planmeta">${meta || 'waiting for planner…'}</div>
+    ${body}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WebSocket
+// ═══════════════════════════════════════════════════════════════
+const connEl   = document.getElementById('conn');
+const statusEl = document.getElementById('status');
+const gridEl   = document.getElementById('grid');
+const tsEl     = document.getElementById('ts');
+
+function connect() {
+  const ws = new WebSocket(`ws://${location.host}/ws`);
+
+  ws.onopen = () => {
+    connEl.classList.add('live');
+    statusEl.textContent = 'live';
+  };
+  ws.onclose = () => {
+    connEl.classList.remove('live');
+    statusEl.textContent = 'disconnected — retrying…';
+    setTimeout(connect, 2000);
+  };
+  ws.onmessage = ev => {
+    const data  = JSON.parse(ev.data);
+    const st    = data.state || {};
+    const zones = st.zones   || {};
+
+    updateHeatmap(zones);
+    updateRings(st.users);
+
+    const z1 = zones['reading-1'];
+    if (z1) pushTrend(z1);
+
+    let html = '';
+    for (const [name, z] of Object.entries(zones)) html += zoneCard(name, z);
+    html += outdoorCard(st.outdoor);
+    html += planCard(data.plan, data.actuators);
+    if (!Object.keys(zones).length)
+      html = '<div class="card"><h2>Waiting for data…</h2></div>' + html;
+    gridEl.innerHTML = html;
+
+    if (st.ts) tsEl.textContent = 'last update: ' + new Date(st.ts).toLocaleTimeString();
+  };
+}
+connect();
+</script>
+</body>
+</html>

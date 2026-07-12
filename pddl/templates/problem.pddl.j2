@@ -1,0 +1,14 @@
+;; Auto-generated LibriSense problem instance — do not edit by hand.
+;; Rendered by modules/problem_generator/generator.py from library/state
+;; at {{ stamp }}.
+(define (problem librisense-{{ serial }})
+  (:domain librisense)
+  (:objects {{ zones | join(' ') }} - zone)
+  (:init
+    (= (total-cost) 0)
+{{ init_block }}
+  )
+  (:goal (and
+{{ goal_block }}
+  ))
+  (:metric minimize (total-cost)))

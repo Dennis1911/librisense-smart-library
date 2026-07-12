@@ -1,0 +1,244 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 900" font-family="Arial, sans-serif">
+  <defs>
+    <linearGradient id="gEdge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E8F4FB"/>
+      <stop offset="100%" stop-color="#C9E3F3"/>
+    </linearGradient>
+    <linearGradient id="gCore" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFF4D6"/>
+      <stop offset="100%" stop-color="#FFE1A1"/>
+    </linearGradient>
+    <linearGradient id="gPlan" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E7F7E4"/>
+      <stop offset="100%" stop-color="#B8E5B0"/>
+    </linearGradient>
+    <linearGradient id="gUI" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F1E6FA"/>
+      <stop offset="100%" stop-color="#D4B8ED"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#34495E"/>
+    </marker>
+    <marker id="arrowDash" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8E44AD"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="700" y="35" text-anchor="middle" font-size="24" font-weight="bold" fill="#1F3A5F">LibriSense — Smart Library System Architecture</text>
+  <text x="700" y="60" text-anchor="middle" font-size="13" fill="#5A7187">Adaptive Learning Environment · Smart Building Domain · Monitoring + Automation</text>
+
+  <!-- ============= EDGE / IoT LAYER (Raspberry Pi 1) ============= -->
+  <rect x="40" y="90" width="380" height="740" rx="12" fill="url(#gEdge)" stroke="#3B82C4" stroke-width="2"/>
+  <text x="230" y="115" text-anchor="middle" font-size="16" font-weight="bold" fill="#1F3A5F">Edge / IoT Node</text>
+  <text x="230" y="133" text-anchor="middle" font-size="12" fill="#3B82C4">Raspberry Pi 3 B+ (Machine #1)</text>
+
+  <!-- Sensors block -->
+  <rect x="60" y="150" width="340" height="310" rx="8" fill="#FFFFFF" stroke="#3B82C4"/>
+  <text x="230" y="172" text-anchor="middle" font-size="14" font-weight="bold" fill="#1F3A5F">Sensors (≥ 4 — physical + simulated)</text>
+
+  <g font-size="12" fill="#222">
+    <rect x="75" y="185" width="310" height="32" rx="4" fill="#F5FAFD" stroke="#B6D2E3"/>
+    <text x="85" y="205">🌡 Temperature + Humidity — Sense HAT (I²C)</text>
+
+    <rect x="75" y="222" width="310" height="32" rx="4" fill="#F5FAFD" stroke="#B6D2E3"/>
+    <text x="85" y="242">💡 Ambient Light — GrovePi Light Sensor</text>
+
+    <rect x="75" y="259" width="310" height="32" rx="4" fill="#F5FAFD" stroke="#B6D2E3"/>
+    <text x="85" y="279">🔊 Noise Level — GrovePi Sound Sensor</text>
+
+    <rect x="75" y="296" width="310" height="32" rx="4" fill="#F5FAFD" stroke="#B6D2E3"/>
+    <text x="85" y="316">🚶 Occupancy / PIR — Grove PIR Motion</text>
+
+    <rect x="75" y="333" width="310" height="32" rx="4" fill="#F5FAFD" stroke="#B6D2E3"/>
+    <text x="85" y="353">🫧 CO₂ (simulated, derived from occupancy)</text>
+
+    <rect x="75" y="370" width="310" height="32" rx="4" fill="#F5FAFD" stroke="#B6D2E3"/>
+    <text x="85" y="390">📅 Learner Session State (software sensor)</text>
+
+    <rect x="75" y="407" width="310" height="32" rx="4" fill="#F5FAFD" stroke="#B6D2E3"/>
+    <text x="85" y="427">☁ Weather API (software sensor)</text>
+  </g>
+
+  <!-- Actuators block -->
+  <rect x="60" y="480" width="340" height="330" rx="8" fill="#FFFFFF" stroke="#3B82C4"/>
+  <text x="230" y="502" text-anchor="middle" font-size="14" font-weight="bold" fill="#1F3A5F">Actuators (≥ 4 — physical + simulated)</text>
+
+  <g font-size="12" fill="#222">
+    <rect x="75" y="515" width="310" height="32" rx="4" fill="#F5FAFD" stroke="#B6D2E3"/>
+    <text x="85" y="535">🔆 Reading Lamp — Plugwise Smart Switch</text>
+
+    <rect x="75" y="552" width="310" height="32" rx="4" fill="#F5FAFD" stroke="#B6D2E3"/>
+    <text x="85" y="572">♨ Heater / Fan — Plugwise Smart Switch</text>
+
+    <rect x="75" y="589" width="310" height="32" rx="4" fill="#F5FAFD" stroke="#B6D2E3"/>
+    <text x="85" y="609">🔔 Break Buzzer + LED — GrovePi</text>
+
+    <rect x="75" y="626" width="310" height="32" rx="4" fill="#F5FAFD" stroke="#B6D2E3"/>
+    <text x="85" y="646">🪟 Ventilation Relay — Grove Relay</text>
+
+    <rect x="75" y="663" width="310" height="32" rx="4" fill="#F5FAFD" stroke="#B6D2E3"/>
+    <text x="85" y="683">📢 TTS Audio Notification (software)</text>
+
+    <rect x="75" y="700" width="310" height="32" rx="4" fill="#F5FAFD" stroke="#B6D2E3"/>
+    <text x="85" y="720">🖥 Dashboard Banner Alert (software)</text>
+
+    <rect x="75" y="737" width="310" height="60" rx="4" fill="#EFF7FC" stroke="#B6D2E3"/>
+    <text x="85" y="756" font-weight="bold">Device Drivers</text>
+    <text x="85" y="772">Python: grovepi, sense-hat, RPi.GPIO,</text>
+    <text x="85" y="788">plugwise (ZigBee), paho-mqtt</text>
+  </g>
+
+  <!-- ============= CORE PROCESSING (Laptop / Pi 2) ============= -->
+  <rect x="460" y="90" width="480" height="740" rx="12" fill="url(#gCore)" stroke="#D9A43C" stroke-width="2"/>
+  <text x="700" y="115" text-anchor="middle" font-size="16" font-weight="bold" fill="#6C4A00"/>
+  <text x="700" y="115" text-anchor="middle" font-size="16" font-weight="bold" fill="#6C4A00">Core Processing + Planning Node</text>
+  <text x="700" y="133" text-anchor="middle" font-size="12" fill="#9C7515">Laptop or Raspberry Pi #2 (Machine #2)</text>
+
+  <!-- MQTT broker -->
+  <rect x="480" y="155" width="440" height="70" rx="8" fill="#FFFFFF" stroke="#D9A43C"/>
+  <text x="700" y="180" text-anchor="middle" font-size="14" font-weight="bold" fill="#6C4A00">MQTT Broker — Mosquitto (Pub/Sub)</text>
+  <text x="700" y="200" text-anchor="middle" font-size="11" fill="#555">library/sensors/* · library/state · library/plan · library/actions</text>
+  <text x="700" y="215" text-anchor="middle" font-size="11" fill="#555">indirect, loosely-coupled communication — satisfies "System Integration"</text>
+
+  <!-- Processing -->
+  <rect x="480" y="245" width="210" height="130" rx="8" fill="#FFFFFF" stroke="#D9A43C"/>
+  <text x="585" y="268" text-anchor="middle" font-size="13" font-weight="bold" fill="#6C4A00">Processing Module</text>
+  <text x="585" y="287" text-anchor="middle" font-size="11" fill="#333">Aggregates sensor streams</text>
+  <text x="585" y="303" text-anchor="middle" font-size="11" fill="#333">Occupancy estimation</text>
+  <text x="585" y="319" text-anchor="middle" font-size="11" fill="#333">Pomodoro / focus-session FSM</text>
+  <text x="585" y="335" text-anchor="middle" font-size="11" fill="#333">Comfort-index calculation</text>
+  <text x="585" y="355" text-anchor="middle" font-size="11" font-style="italic" fill="#6C4A00">Python + InfluxDB/SQLite</text>
+
+  <!-- Problem Generator -->
+  <rect x="710" y="245" width="210" height="130" rx="8" fill="#FFFFFF" stroke="#D9A43C"/>
+  <text x="815" y="268" text-anchor="middle" font-size="13" font-weight="bold" fill="#6C4A00">Problem Generator</text>
+  <text x="815" y="287" text-anchor="middle" font-size="11" fill="#333">State snapshot → PDDL problem</text>
+  <text x="815" y="303" text-anchor="middle" font-size="11" fill="#333">Jinja2 templates</text>
+  <text x="815" y="319" text-anchor="middle" font-size="11" fill="#333">Goals derived from policy</text>
+  <text x="815" y="335" text-anchor="middle" font-size="11" fill="#333">Triggered on event / cron</text>
+  <text x="815" y="355" text-anchor="middle" font-size="11" font-style="italic" fill="#6C4A00">auto-generated — requirement ✓</text>
+
+  <!-- AI Planner -->
+  <rect x="480" y="395" width="440" height="140" rx="8" fill="url(#gPlan)" stroke="#3C8A3C" stroke-width="2"/>
+  <text x="700" y="418" text-anchor="middle" font-size="14" font-weight="bold" fill="#1E5E1E">AI Planning Engine</text>
+  <text x="700" y="438" text-anchor="middle" font-size="11" fill="#333">PDDL 2.1 / 3.1 — numeric + temporal fluents</text>
+  <text x="700" y="454" text-anchor="middle" font-size="11" fill="#333">Planner: Fast Downward · ENHSP · OPTIC</text>
+  <text x="700" y="473" text-anchor="middle" font-size="11" fill="#333">Domain: adjust_light · adjust_heating · ventilate · suggest_break</text>
+  <text x="700" y="489" text-anchor="middle" font-size="11" fill="#333">Goals: comfort ∧ break-hygiene ∧ min-energy</text>
+  <text x="700" y="508" text-anchor="middle" font-size="11" fill="#333">Outputs ordered action sequence to Execution Module</text>
+  <text x="700" y="525" text-anchor="middle" font-size="11" font-style="italic" fill="#1E5E1E">subprocess wrapper — language-agnostic</text>
+
+  <!-- Execution -->
+  <rect x="480" y="555" width="210" height="110" rx="8" fill="#FFFFFF" stroke="#D9A43C"/>
+  <text x="585" y="578" text-anchor="middle" font-size="13" font-weight="bold" fill="#6C4A00">Execution Module</text>
+  <text x="585" y="598" text-anchor="middle" font-size="11" fill="#333">Dispatches plan steps</text>
+  <text x="585" y="614" text-anchor="middle" font-size="11" fill="#333">Publishes library/actions</text>
+  <text x="585" y="630" text-anchor="middle" font-size="11" fill="#333">Re-plan on state drift</text>
+  <text x="585" y="648" text-anchor="middle" font-size="11" font-style="italic" fill="#6C4A00">closed-loop monitor</text>
+
+  <!-- State Store -->
+  <rect x="710" y="555" width="210" height="110" rx="8" fill="#FFFFFF" stroke="#D9A43C"/>
+  <text x="815" y="578" text-anchor="middle" font-size="13" font-weight="bold" fill="#6C4A00">State &amp; History Store</text>
+  <text x="815" y="598" text-anchor="middle" font-size="11" fill="#333">Time-series sensor DB</text>
+  <text x="815" y="614" text-anchor="middle" font-size="11" fill="#333">Plan history &amp; audit log</text>
+  <text x="815" y="630" text-anchor="middle" font-size="11" fill="#333">Learner profiles</text>
+  <text x="815" y="648" text-anchor="middle" font-size="11" font-style="italic" fill="#6C4A00">InfluxDB + SQLite</text>
+
+  <!-- Reqs box -->
+  <rect x="480" y="685" width="440" height="135" rx="8" fill="#FFFFFF" stroke="#D9A43C" stroke-dasharray="4 3"/>
+  <text x="700" y="707" text-anchor="middle" font-size="13" font-weight="bold" fill="#6C4A00">Satisfies Course Requirements</text>
+  <g font-size="11" fill="#333">
+    <text x="500" y="727">✓ System Design — 6 decoupled modules</text>
+    <text x="500" y="745">✓ System Integration — MQTT pub/sub</text>
+    <text x="500" y="763">✓ IoT — 7 sensors, 6 actuators (physical + simulated)</text>
+    <text x="500" y="781">✓ AI Planning — PDDL domain + auto problem gen</text>
+    <text x="500" y="799">✓ Visualisation — live state &amp; current plan</text>
+    <text x="500" y="817">✓ Distribution — Edge Pi ↔ Core Node over MQTT</text>
+  </g>
+
+  <!-- ============= UI / VIS LAYER (Machine #3 or co-located) ============= -->
+  <rect x="980" y="90" width="380" height="740" rx="12" fill="url(#gUI)" stroke="#8E44AD" stroke-width="2"/>
+  <text x="1170" y="115" text-anchor="middle" font-size="16" font-weight="bold" fill="#4A1D70">Visualisation &amp; Interaction</text>
+  <text x="1170" y="133" text-anchor="middle" font-size="12" fill="#6C2E9C">Web browser / kiosk display (optional 3rd node)</text>
+
+  <!-- Dashboard -->
+  <rect x="1000" y="150" width="340" height="200" rx="8" fill="#FFFFFF" stroke="#8E44AD"/>
+  <text x="1170" y="172" text-anchor="middle" font-size="14" font-weight="bold" fill="#4A1D70">Learner Dashboard (React + WebSocket)</text>
+  <text x="1020" y="195" font-size="12">• Live environment state (°C, lux, dB, CO₂)</text>
+  <text x="1020" y="215" font-size="12">• Floor-plan heatmap of comfort zones</text>
+  <text x="1020" y="235" font-size="12">• Pomodoro timer &amp; focus streak</text>
+  <text x="1020" y="255" font-size="12">• Current plan — Gantt-style action queue</text>
+  <text x="1020" y="275" font-size="12">• Sensor history charts (last 24 h)</text>
+  <text x="1020" y="295" font-size="12">• Manual override &amp; user preferences</text>
+  <text x="1020" y="315" font-size="12">• Energy consumption indicator</text>
+  <text x="1020" y="335" font-size="11" font-style="italic" fill="#4A1D70">stack: React · Recharts · FastAPI · socket.io</text>
+
+  <!-- Break reminder -->
+  <rect x="1000" y="370" width="340" height="130" rx="8" fill="#FFFFFF" stroke="#8E44AD"/>
+  <text x="1170" y="392" text-anchor="middle" font-size="14" font-weight="bold" fill="#4A1D70">Break Reminder UX</text>
+  <text x="1020" y="415" font-size="12">• Pomodoro 25 / 5 cycles — configurable</text>
+  <text x="1020" y="435" font-size="12">• Gentle on-screen countdown + colour cue</text>
+  <text x="1020" y="455" font-size="12">• Escalates: dashboard → LED → buzzer → TTS</text>
+  <text x="1020" y="475" font-size="12">• Snooze / dismiss respected for 2 min</text>
+  <text x="1020" y="495" font-size="12">• Logs compliance for analytics</text>
+
+  <!-- Planner-view -->
+  <rect x="1000" y="520" width="340" height="160" rx="8" fill="#FFFFFF" stroke="#8E44AD"/>
+  <text x="1170" y="542" text-anchor="middle" font-size="14" font-weight="bold" fill="#4A1D70">Current-Plan Visualiser</text>
+  <text x="1020" y="565" font-size="12">Consumes library/plan MQTT topic</text>
+  <text x="1020" y="585" font-size="12">Renders PDDL action trace as timeline</text>
+  <text x="1020" y="605" font-size="12">Shows predicate diff (before → after)</text>
+  <text x="1020" y="625" font-size="12">Highlights currently-executing action</text>
+  <text x="1020" y="645" font-size="12">Replay mode for demo</text>
+  <text x="1020" y="665" font-size="11" font-style="italic" fill="#4A1D70">satisfies Visualisation requirement</text>
+
+  <!-- Users -->
+  <rect x="1000" y="700" width="340" height="110" rx="8" fill="#FDF3FF" stroke="#8E44AD"/>
+  <text x="1170" y="722" text-anchor="middle" font-size="14" font-weight="bold" fill="#4A1D70">Users</text>
+  <text x="1020" y="745" font-size="12">👩‍🎓 Learner — interacts via dashboard / wearable</text>
+  <text x="1020" y="765" font-size="12">👨‍💼 Librarian — config, overrides, energy report</text>
+  <text x="1020" y="785" font-size="12">🧑‍🔬 Evaluator — demo / replay mode</text>
+
+  <!-- ARROWS between layers -->
+  <!-- Edge -> MQTT -->
+  <line x1="400" y1="200" x2="478" y2="185" stroke="#34495E" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="420" y="175" font-size="10" fill="#34495E">publish sensors</text>
+
+  <line x1="478" y1="210" x2="400" y2="600" stroke="#34495E" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arrow)"/>
+  <text x="410" y="430" font-size="10" fill="#34495E">actuator cmds</text>
+
+  <!-- MQTT -> Processing -->
+  <line x1="585" y1="225" x2="585" y2="243" stroke="#34495E" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="815" y1="225" x2="815" y2="243" stroke="#34495E" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Processing -> Problem Generator -->
+  <line x1="690" y1="310" x2="708" y2="310" stroke="#34495E" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Problem Generator -> Planner -->
+  <line x1="815" y1="377" x2="815" y2="393" stroke="#34495E" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="820" y="388" font-size="10" fill="#34495E">problem.pddl</text>
+
+  <!-- Planner -> Execution -->
+  <line x1="585" y1="537" x2="585" y2="553" stroke="#34495E" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="525" y="550" font-size="10" fill="#1E5E1E">plan.out</text>
+
+  <!-- Execution -> MQTT (loops back) -->
+  <line x1="585" y1="665" x2="585" y2="225" stroke="#34495E" stroke-width="1.5" stroke-dasharray="4 3" fill="none" marker-end="url(#arrow)"/>
+  <text x="455" y="420" font-size="10" fill="#34495E" transform="rotate(-90 455 420)">actions</text>
+
+  <!-- State Store link -->
+  <line x1="690" y1="610" x2="708" y2="610" stroke="#34495E" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- MQTT -> Visualisation -->
+  <line x1="920" y1="190" x2="998" y2="230" stroke="#8E44AD" stroke-width="2" marker-end="url(#arrowDash)"/>
+  <text x="925" y="185" font-size="10" fill="#8E44AD">subscribe state/plan</text>
+
+  <!-- Visualisation -> MQTT (overrides) -->
+  <line x1="998" y1="300" x2="920" y2="210" stroke="#8E44AD" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrowDash)"/>
+  <text x="930" y="295" font-size="10" fill="#8E44AD">user overrides</text>
+
+  <!-- Legend -->
+  <rect x="40" y="845" width="1320" height="40" rx="6" fill="#FAFAFA" stroke="#BBB"/>
+  <text x="55" y="870" font-size="12" fill="#333"><tspan font-weight="bold">Legend:</tspan>  solid → data/command flow  ·  dashed → control/override  ·  blue = Machine #1 (Edge)  ·  yellow = Machine #2 (Core)  ·  purple = Machine #3 (UI) — satisfies ≥ 2-machine distribution</text>
+</svg>

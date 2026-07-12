@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 660" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="490" y="30" text-anchor="middle" font-size="19" font-weight="bold" fill="#0f172a">LibriSense: Logical System Architecture</text>
+  <text x="490" y="50" text-anchor="middle" font-size="11.5" fill="#475569">All modules communicate only indirectly via MQTT topics (publish/subscribe). The logical view is independent of deployment; any module can run on any host.</text>
+
+  <!-- ===== Top row: sensing + visualisation ===== -->
+  <!-- IoT sensing -->
+  <rect x="30" y="80" width="220" height="92" rx="10" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+  <text x="140" y="102" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#0c4a6e">IoT Sensing Drivers</text>
+  <text x="140" y="121" text-anchor="middle" font-size="11" fill="#0c4a6e">motion (occupancy) · illuminance</text>
+  <text x="140" y="137" text-anchor="middle" font-size="11" fill="#0c4a6e">GrovePi+ analog sensors, 2 Hz</text>
+  <text x="140" y="153" text-anchor="middle" font-size="10.5" fill="#0369a1" font-style="italic">physical sensors</text>
+
+  <!-- Weather -->
+  <rect x="280" y="80" width="200" height="92" rx="10" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+  <text x="380" y="102" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#0c4a6e">Weather Software-Sensor</text>
+  <text x="380" y="121" text-anchor="middle" font-size="11" fill="#0c4a6e">outdoor temp · humidity · clouds</text>
+  <text x="380" y="137" text-anchor="middle" font-size="11" fill="#0c4a6e">Open-Meteo REST, 10 min</text>
+  <text x="380" y="153" text-anchor="middle" font-size="10.5" fill="#0369a1" font-style="italic">software-based sensor</text>
+
+  <!-- Visualisation -->
+  <rect x="640" y="80" width="310" height="92" rx="10" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5"/>
+  <text x="795" y="102" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#713f12">Visualisation</text>
+  <text x="795" y="121" text-anchor="middle" font-size="11" fill="#713f12">web dashboard: current state + latest plan, heatmap,</text>
+  <text x="795" y="136" text-anchor="middle" font-size="11" fill="#713f12">Pomodoro rings, trend charts · on-site LCD (CO₂ traffic light)</text>
+  <text x="795" y="153" text-anchor="middle" font-size="10.5" fill="#a16207" font-style="italic">subscribes: state, plan, sensors, actuators</text>
+
+  <!-- Arrows top row to bus -->
+  <line x1="140" y1="172" x2="140" y2="288" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+  <text x="148" y="235" font-size="10.5" fill="#334155">pub library/sensors/#</text>
+
+  <line x1="380" y1="172" x2="380" y2="288" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+  <text x="388" y="235" font-size="10.5" fill="#334155">pub library/sensors/weather</text>
+  <text x="388" y="249" font-size="10" fill="#64748b">(retained)</text>
+
+  <line x1="795" y1="288" x2="795" y2="172" stroke="#334155" stroke-width="1.6" marker-end="url(#arr)"/>
+  <text x="803" y="235" font-size="10.5" fill="#334155">sub state · plan · actuators/#</text>
+
+  <!-- ===== Central bus ===== -->
+  <rect x="30" y="290" width="920" height="58" rx="10" fill="#1e293b"/>
+  <text x="490" y="314" text-anchor="middle" font-size="14.5" font-weight="bold" fill="#f8fafc">Eclipse Mosquitto: MQTT publish/subscribe broker</text>
+  <text x="490" y="334" text-anchor="middle" font-size="10.5" fill="#cbd5e1">topics: library/sensors/# · library/state · library/problem · library/plan · library/actions · library/actuators/#   (latest-value topics retained for late joiners)</text>
+
+  <!-- ===== Bottom row: the closed control loop ===== -->
+  <!-- Processing -->
+  <rect x="30" y="420" width="185" height="130" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="122" y="442" text-anchor="middle" font-size="13" font-weight="bold" fill="#14532d">Processing / Context</text>
+  <text x="122" y="461" text-anchor="middle" font-size="10.5" fill="#14532d">sliding windows · occupancy</text>
+  <text x="122" y="476" text-anchor="middle" font-size="10.5" fill="#14532d">CO₂ proxy (ASHRAE ramp)</text>
+  <text x="122" y="491" text-anchor="middle" font-size="10.5" fill="#14532d">comfort index · learner FSM</text>
+  <text x="122" y="506" text-anchor="middle" font-size="10.5" fill="#14532d">(idle/focused/break-due/on-break)</text>
+  <text x="122" y="527" text-anchor="middle" font-size="10" fill="#166534" font-style="italic">world state @ 2 Hz</text>
+
+  <line x1="100" y1="420" x2="100" y2="352" stroke="#334155" stroke-width="1.4" marker-end="url(#arr)"/>
+  <text x="34" y="376" font-size="10" fill="#334155">sub sensors/#, actions</text>
+  <line x1="160" y1="352" x2="160" y2="420" stroke="#334155" stroke-width="1.4"/>
+  <line x1="160" y1="420" x2="160" y2="358" stroke="#334155" stroke-width="1.4" marker-end="url(#arr)"/>
+  <text x="166" y="393" font-size="10" fill="#334155">pub state</text>
+
+  <!-- Problem generator -->
+  <rect x="245" y="420" width="185" height="130" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="337" y="442" text-anchor="middle" font-size="13" font-weight="bold" fill="#4c1d95">Problem Generator</text>
+  <text x="337" y="461" text-anchor="middle" font-size="10.5" fill="#4c1d95">discretisation: light &lt;40 %,</text>
+  <text x="337" y="476" text-anchor="middle" font-size="10.5" fill="#4c1d95">CO₂ bands 800/1100 ppm</text>
+  <text x="337" y="491" text-anchor="middle" font-size="10.5" fill="#4c1d95">situational goals + weather-</text>
+  <text x="337" y="506" text-anchor="middle" font-size="10.5" fill="#4c1d95">based action costs → PDDL</text>
+  <text x="337" y="527" text-anchor="middle" font-size="10" fill="#5b21b6" font-style="italic">on state change / 30 s</text>
+
+  <line x1="315" y1="420" x2="315" y2="352" stroke="#334155" stroke-width="1.4" marker-end="url(#arr)"/>
+  <text x="248" y="376" font-size="10" fill="#334155">sub state, actuators/#</text>
+  <line x1="375" y1="420" x2="375" y2="358" stroke="#334155" stroke-width="1.4" marker-end="url(#arr)"/>
+  <text x="381" y="393" font-size="10" fill="#334155">pub problem</text>
+
+  <!-- Planner -->
+  <rect x="460" y="420" width="185" height="130" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="552" y="442" text-anchor="middle" font-size="13" font-weight="bold" fill="#4c1d95">AI Planner</text>
+  <text x="552" y="461" text-anchor="middle" font-size="10.5" fill="#4c1d95">Fast Downward</text>
+  <text x="552" y="476" text-anchor="middle" font-size="10.5" fill="#4c1d95">A* + LM-Cut (cost-optimal)</text>
+  <text x="552" y="491" text-anchor="middle" font-size="10.5" fill="#4c1d95">classical PDDL + action costs</text>
+  <text x="552" y="506" text-anchor="middle" font-size="10.5" fill="#4c1d95">empty-goal / unsolvable guard</text>
+  <text x="552" y="527" text-anchor="middle" font-size="10" fill="#5b21b6" font-style="italic">plan in ~130 ms</text>
+
+  <line x1="530" y1="420" x2="530" y2="352" stroke="#334155" stroke-width="1.4" marker-end="url(#arr)"/>
+  <text x="474" y="376" font-size="10" fill="#334155">sub problem</text>
+  <line x1="590" y1="420" x2="590" y2="358" stroke="#334155" stroke-width="1.4" marker-end="url(#arr)"/>
+  <text x="596" y="393" font-size="10" fill="#334155">pub plan</text>
+
+  <!-- Execution -->
+  <rect x="675" y="420" width="130" height="130" rx="10" fill="#ffe4e6" stroke="#e11d48" stroke-width="1.5"/>
+  <text x="740" y="442" text-anchor="middle" font-size="13" font-weight="bold" fill="#881337">Execution</text>
+  <text x="740" y="461" text-anchor="middle" font-size="10.5" fill="#881337">dispatch plan</text>
+  <text x="740" y="476" text-anchor="middle" font-size="10.5" fill="#881337">actions, dedup</text>
+  <text x="740" y="491" text-anchor="middle" font-size="10.5" fill="#881337">unchanged plans</text>
+  <text x="740" y="527" text-anchor="middle" font-size="10" fill="#9f1239" font-style="italic">re-plan via loop</text>
+
+  <line x1="715" y1="420" x2="715" y2="352" stroke="#334155" stroke-width="1.4" marker-end="url(#arr)"/>
+  <text x="668" y="376" font-size="10" fill="#334155">sub plan</text>
+  <line x1="765" y1="420" x2="765" y2="358" stroke="#334155" stroke-width="1.4" marker-end="url(#arr)"/>
+  <text x="771" y="393" font-size="10" fill="#334155">pub actions</text>
+
+  <!-- Actuation -->
+  <rect x="835" y="420" width="115" height="130" rx="10" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+  <text x="892" y="442" text-anchor="middle" font-size="13" font-weight="bold" fill="#0c4a6e">Actuation</text>
+  <text x="892" y="461" text-anchor="middle" font-size="10.5" fill="#0c4a6e">lamp relay</text>
+  <text x="892" y="476" text-anchor="middle" font-size="10.5" fill="#0c4a6e">LED · buzzer</text>
+  <text x="892" y="491" text-anchor="middle" font-size="10.5" fill="#0c4a6e">LCD · ventilation</text>
+  <text x="892" y="506" text-anchor="middle" font-size="10.5" fill="#0c4a6e">(virtual)</text>
+  <text x="892" y="527" text-anchor="middle" font-size="10" fill="#0369a1" font-style="italic">physical effects</text>
+
+  <line x1="870" y1="420" x2="870" y2="352" stroke="#334155" stroke-width="1.4" marker-end="url(#arr)"/>
+  <text x="812" y="376" font-size="10" fill="#334155">sub actions</text>
+  <line x1="925" y1="420" x2="925" y2="358" stroke="#334155" stroke-width="1.4" marker-end="url(#arr)"/>
+  <text x="905" y="393" font-size="10" fill="#334155">pub</text>
+  <text x="890" y="405" font-size="10" fill="#334155">actuators/#</text>
+
+  <!-- Closed loop annotation -->
+  <text x="490" y="595" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f172a">Closed control loop: sense → context → problem generation → cost-optimal planning → execution → physical action → sensed again</text>
+  <text x="490" y="615" text-anchor="middle" font-size="11" fill="#475569">Actuator feedback (library/actuators/#) flows back into problem generation; every discretised state change triggers re-planning (verified self-correction &lt; 1 s).</text>
+  <text x="490" y="640" text-anchor="middle" font-size="10" fill="#94a3b8">LibriSense · Smart Cities and the IoT 2026 · University of Stuttgart</text>
+</svg>

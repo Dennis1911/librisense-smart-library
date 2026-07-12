@@ -1,0 +1,14 @@
+[Unit]
+Description=Disable WiFi power management (Pi 3 B+ drops Wi-Fi when power_save is on)
+After=sys-subsystem-net-devices-wlan0.device network-pre.target
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+# Disable power-save on wlan0. The Pi 3 B+ WiFi periodically drops its
+# association when power_save is on; this is the standard fix.
+ExecStart=/usr/sbin/iw dev wlan0 set power_save off
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

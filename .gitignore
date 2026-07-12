@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# Node / dashboard
+node_modules/
+.next/
+dist/
+build/
+.cache/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Local config / secrets
+.env
+.env.local
+config/local.yaml
+secrets/
+
+# Generated artefacts
+pddl/problems/generated/*.pddl
+!pddl/problems/generated/.gitkeep
+logs/
+*.sqlite
+*.db
+data/
+runs/
+
+# OS / OneDrive
+.icloud
+~$*

@@ -1,0 +1,16 @@
+# Core node (Raspberry Pi 5) Python dependencies.
+# Modules: processing, problem_generator, planner wrapper, execution, dashboard backend.
+#   python3 -m venv .venv && .venv/bin/pip install -r requirements-core.txt
+
+paho-mqtt>=2.0        # MQTT client
+numpy>=1.26           # state aggregation, sliding windows
+jinja2>=3.1           # PDDL problem templating
+pyyaml>=6.0           # config loading (topics.yaml, devices.yaml, network.yaml)
+
+# Dashboard backend (WebSocket bridge MQTT <-> browser)
+fastapi>=0.110
+uvicorn[standard]>=0.29
+websockets>=12.0
+
+# Software actuator: text-to-speech break reminders
+pyttsx3>=2.90

@@ -1,0 +1,21 @@
+[Unit]
+Description=LibriSense demo seat enricher (adds 5 simulated seats to library/state)
+After=network-online.target mosquitto.service librisense-processing.service
+Wants=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=10
+
+[Service]
+Type=simple
+Environment=PYTHONUNBUFFERED=1
+User=librisense
+WorkingDirectory=/home/librisense/librisense
+ExecStart=/home/librisense/librisense/.venv/bin/python tools/mock_sensors.py
+Restart=on-failure
+RestartSec=5
+
+# NOT enabled by default — start manually for demos:
+#   sudo systemctl start librisense-mockseats
+#   sudo systemctl stop  librisense-mockseats
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,61 @@
+# LibriSense Edge device map — what is physically wired to the GrovePi+.
+# Verified live on 2026-06-10 (Pi 3 B+, GrovePi+, i2c_arm_baudrate=50000).
+#
+# The sensor_publisher reads each analog/digital port, applies a transform,
+# and publishes JSON to the sensor topic at the configured sample rate.
+
+zone: reading-1          # single zone for now; multi-zone later
+
+sample_hz: 2             # readings per second per sensor (snappier updates)
+
+grovepi:
+  sensors:
+    - name: motion
+      port: 0            # A0
+      kind: analog
+      topic: library/sensors/motion
+      transform: motion  # analog motion sensor -> occupancy boolean
+      threshold: 100     # raw value above this => motion present
+      unit: bool
+
+    # NOTE: the Grove sound sensor was removed. The GrovePi I2C cannot sample
+    # fast enough (~10-200 Hz) to measure audio loudness from the sensor's raw
+    # waveform (needs kHz + RMS); measured loud == quiet. A1 is now free.
+
+    - name: light
+      port: 2            # A2  (light sensor moved here after LCD -> I2C-3)
+      kind: analog
+      topic: library/sensors/light
+      transform: level   # raw 0..1023 -> 0..100 relative brightness
+      unit: pct
+      # NOTE: Grove LDR is not lux-calibrated. We publish raw + a 0..100
+      # brightness. A rough lux estimate can be added later if needed.
+      # Verified live 2026-06-10: ~700 raw in a lit room (~68 %).
+
+  # Digital-output actuators on the GrovePi (driven by the same process that
+  # owns the GrovePi I2C — the sensor_publisher — to avoid bus contention).
+  actuators:
+    - name: break_led
+      port: 2            # D2 — visual break nudge
+      kind: digital
+    - name: break_buzzer
+      port: 3            # D3 (PWM-capable) — audible break nudge
+      kind: pwm
+      volume: 35         # PWM duty 0..255; low = quiet (user-tuned)
+
+  display:
+    kind: grove_lcd_rgb_v4
+    i2c_text: 0x3e
+    i2c_rgb: 0x62
+
+plugwise:
+  stick: /dev/ttyUSB0    # FTDI USB stick, MAC 000D6F000290172B
+  circles:
+    - mac: 000D6F0000729939   # Circle+ (coordinator) — relay verified switchable
+      role: reading_lamp      # provisional mapping
+  # A second regular Circle exists but has not joined the network yet
+  # (CirclePlusScanRequest times out). Pair it later if a 2nd actuator is needed.
+
+# Not present in our kit (handle in software per the proposal):
+#   - temperature / humidity (no DHT wired yet)
+#   - CO2 (always simulated: occupancy x time, ASHRAE)
