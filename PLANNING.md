@@ -64,9 +64,9 @@ See [docs/LibriSense_Architecture.png](docs/LibriSense_Architecture.png) for the
 
 | Name           | Student ID  | GitHub                                              |
 |----------------|-------------|-----------------------------------------------------|
-| Dennis Gunt    | _TBD_       | [@Dennis1911](https://github.com/Dennis1911)        |
+| Dennis Gunt    | 3820436     | [@Dennis1911](https://github.com/Dennis1911)        |
 | Haoyang Chen   | 3854758     | [@wandering2025](https://github.com/wandering2025)  |
-| Niclas _TBD_   | _TBD_       | [@niclmit](https://github.com/niclmit)              |
+| Niclas Mittag  | 3859229     | [@niclmit](https://github.com/niclmit)              |
 
 ---
 

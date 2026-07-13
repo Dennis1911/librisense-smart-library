@@ -17,13 +17,13 @@ clarity, precision, compliance; extent of requirement satisfaction.
 
 | Field | Value |
 |---|---|
-| Student 1 | Dennis Gunt — ID: **[fill in]** |
+| Student 1 | Dennis Gunt — ID: **3820436** |
 | Student 2 | Haoyang Chen — ID: **3854758** |
-| Student 3 | Niclas **[surname]** — ID: **[fill in]** |
+| Student 3 | Niclas Mittag — ID: **3859229** |
 | Group ID | **[assigned by course — fill in]** |
 | Project Title | **LibriSense — An Adaptive Smart Library** |
 | Domain | ☑ **Smart building** |
-| Code Repository Link | https://github.com/Dennis1911/librisense ⚠️ *repo is private — make it public before submission or invite the lecturer as collaborator!* |
+| Code Repository Link | **https://github.com/Dennis1911/librisense-smart-library** (public ✓ — this is the link for the form) |
 
 **Type** (form text):
 
@@ -429,7 +429,7 @@ Compact texts for the small form boxes. No em-dashes, plain sentences.
 
 ## Submission checklist
 
-- [ ] Fill in: Dennis's + Niclas's student IDs, Niclas's surname, Group ID
+- [ ] Fill in: Group ID (names + student IDs are complete)
 - [ ] **Repo access:** make https://github.com/Dennis1911/librisense public
       (or invite the lecturer) — the form links to it!
 - [ ] Export `docs/architecture_asbuilt.svg` → PNG (open in browser,
