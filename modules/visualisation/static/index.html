@@ -32,6 +32,13 @@
   .dot { width: 10px; height: 10px; border-radius: 50%;
          background: var(--bad); box-shadow: 0 0 8px var(--bad); transition: all .3s; }
   .dot.live { background: var(--good); box-shadow: 0 0 8px var(--good); }
+  .demo-btn { margin-left: auto; background: var(--card2); color: var(--muted);
+              border: 1px solid var(--border); border-radius: 999px;
+              padding: 8px 16px; font-size: 13px; font-weight: 600;
+              cursor: pointer; transition: all .2s; }
+  .demo-btn:hover { border-color: var(--muted); }
+  .demo-btn.on { background: rgba(63,185,80,.15); color: var(--good); border-color: var(--good); }
+  .demo-btn:disabled { opacity: .5; cursor: default; }
 
   /* ── Cards & grid ── */
   .card {
@@ -115,6 +122,7 @@
     <h1>LibriSense <span class="sub">— Adaptive Smart Library</span></h1>
     <div class="sub" id="status">connecting…</div>
   </div>
+  <button id="demoToggle" class="demo-btn" onclick="toggleDemoSeats()">Demo seats: off</button>
 </header>
 
 <!-- Row 1: Heatmap + Pomodoro -->
@@ -505,6 +513,31 @@ const statusEl = document.getElementById('status');
 const gridEl   = document.getElementById('grid');
 const tsEl     = document.getElementById('ts');
 
+// ── Demo seats toggle ──────────────────────────────────────────
+// Flips the retained library/control/mockseats flag via the backend;
+// mock_sensors.py adds/removes the 5 simulated seats. State is mirrored
+// back over the WebSocket, so the button reflects reality after reload
+// or if another device toggled it.
+const demoBtn = document.getElementById('demoToggle');
+let demoSeatsOn = false;
+function renderDemoBtn() {
+  demoBtn.textContent = 'Demo seats: ' + (demoSeatsOn ? 'on' : 'off');
+  demoBtn.classList.toggle('on', demoSeatsOn);
+}
+async function toggleDemoSeats() {
+  const next = !demoSeatsOn;
+  demoBtn.disabled = true;
+  try {
+    await fetch('/api/demo-seats?on=' + next, { method: 'POST' });
+    demoSeatsOn = next;          // WebSocket will also confirm shortly
+    renderDemoBtn();
+  } catch (e) {
+    /* leave state as is; the WebSocket reconciles it */
+  } finally {
+    demoBtn.disabled = false;
+  }
+}
+
 function connect() {
   const ws = new WebSocket(`ws://${location.host}/ws`);
 
@@ -521,6 +554,11 @@ function connect() {
     const data  = JSON.parse(ev.data);
     const st    = data.state || {};
     const zones = st.zones   || {};
+
+    if (typeof data.mockseats === 'boolean' && data.mockseats !== demoSeatsOn) {
+      demoSeatsOn = data.mockseats;
+      renderDemoBtn();
+    }
 
     updateHeatmap(zones);
     updateRings(st.users);

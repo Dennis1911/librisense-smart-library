@@ -14,8 +14,10 @@ ExecStart=/home/librisense/librisense/.venv/bin/python tools/mock_sensors.py
 Restart=on-failure
 RestartSec=5
 
-# NOT enabled by default — start manually for demos:
-#   sudo systemctl start librisense-mockseats
-#   sudo systemctl stop  librisense-mockseats
+# Enable it so it always runs; it stays idle until the demo toggle is on.
+# Control it from the dashboard (the "Demo seats" button) or via MQTT:
+#   mosquitto_pub -t library/control/mockseats -m on  -r    # show 6 seats
+#   mosquitto_pub -t library/control/mockseats -m off -r    # back to 1 seat
+# One-time on the Core Pi:  sudo systemctl enable --now librisense-mockseats
 [Install]
 WantedBy=multi-user.target

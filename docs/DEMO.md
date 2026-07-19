@@ -39,15 +39,27 @@ Simulated zones are marked `"simulated": true` and are **skipped by the
 problem generator**, so the planner and the physical actuators only ever act
 on the real seat — the simulation is display-only and safe to run live.
 
+**Toggle it straight from the dashboard** — the "Demo seats" button in the
+top-right of the header. No SSH, no sudo: it flips a retained MQTT flag that
+`mock_sensors.py` listens on, so it works over the hotspot too and the button
+reflects the current state on every device.
+
+One-time setup on the Core Pi (so the enricher is always running, idle until
+toggled on):
+
 ```bash
-# start for the demo (on the Core Pi, e.g. via SSH over the hotspot):
-ssh librisense@10.42.0.1 'sudo systemctl start librisense-mockseats'
-# stop afterwards:
-ssh librisense@10.42.0.1 'sudo systemctl stop librisense-mockseats'
+sudo systemctl enable --now librisense-mockseats
 ```
 
-Tip: start it at home before leaving — it survives reboots only if enabled;
-started (not enabled) state is intentional so normal operation stays 1-zone.
+Fallback without the dashboard (e.g. from a shell on the Core Pi):
+
+```bash
+mosquitto_pub -t library/control/mockseats -m on  -r   # show 6 seats
+mosquitto_pub -t library/control/mockseats -m off -r   # back to 1 real seat
+```
+
+The flag is retained, so the choice survives reboots and broker restarts;
+default is **off**, so normal operation stays a single real zone.
 
 ## Important: POWER
 

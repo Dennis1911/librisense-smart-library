@@ -108,17 +108,32 @@ def main() -> None:
         enriched["sim_enriched"] = True   # our subscriber ignores this echo
         client.publish("library/state", json.dumps(enriched), retain=True)
 
+    # Gated by the retained flag on library/control/mockseats. The dashboard
+    # (or `mosquitto_pub -t library/control/mockseats -m on -r`) flips this;
+    # when off, we pass real state through untouched. Default OFF so a fresh
+    # broker shows only the one real seat.
+    flag = {"on": False}
+
     def on_connect(c, u, f, rc, p):
         c.subscribe("library/state")
-        print("[mock_sensors] subscribed to library/state")
+        c.subscribe("library/control/mockseats")
+        print("[mock_sensors] subscribed to library/state + control/mockseats "
+              f"(demo seats {'ON' if flag['on'] else 'OFF'})")
 
     def on_message(c, u, msg):
+        if msg.topic == "library/control/mockseats":
+            raw = msg.payload.decode("utf-8", "ignore").strip().lower()
+            flag["on"] = raw in ("on", "true", "1", "yes")
+            print(f"[mock_sensors] demo seats {'ON' if flag['on'] else 'OFF'}")
+            return
         try:
             payload = json.loads(msg.payload)
         except ValueError:
             return
         if payload.get("sim_enriched"):
             return                      # our own echo — never re-enrich it
+        if not flag["on"]:
+            return                      # demo seats off — leave real state as is
         # Event-driven: every real aggregator state is immediately followed
         # by its enriched 6-zone version.
         enrich_and_publish(c, payload)

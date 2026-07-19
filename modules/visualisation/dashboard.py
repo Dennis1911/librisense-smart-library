@@ -31,10 +31,15 @@ STATIC = Path(__file__).parent / "static"
 app = FastAPI(title="LibriSense Dashboard")
 
 # Latest data, updated by the MQTT thread, read by WebSocket handlers.
-latest: dict = {"state": {}, "sensors": {}, "plan": {}, "actuators": {}}
+latest: dict = {"state": {}, "sensors": {}, "plan": {}, "actuators": {},
+                "mockseats": False}
 
 
 def _on_message(client, userdata, msg):
+    if msg.topic == "library/control/mockseats":
+        raw = msg.payload.decode("utf-8", "ignore").strip().lower()
+        latest["mockseats"] = raw in ("on", "true", "1", "yes")
+        return
     try:
         payload = json.loads(msg.payload)
     except ValueError:
@@ -57,7 +62,8 @@ def _start_mqtt() -> mqtt.Client:
                          client_id=f"{broker.get('client_id_prefix','librisense')}-dashboard")
     client.on_connect = lambda c, u, f, rc, p: (
         c.subscribe("library/state"), c.subscribe("library/sensors/#"),
-        c.subscribe("library/plan"), c.subscribe("library/actuators/#"))
+        c.subscribe("library/plan"), c.subscribe("library/actuators/#"),
+        c.subscribe("library/control/mockseats"))
     client.on_message = _on_message
     host = os.environ.get("MQTT_HOST", broker["host"])
     client.connect(host, broker.get("port", 1883), 60)
@@ -79,6 +85,19 @@ def shutdown() -> None:
 @app.get("/")
 def index() -> FileResponse:
     return FileResponse(STATIC / "index.html")
+
+
+@app.post("/api/demo-seats")
+def set_demo_seats(on: bool = False) -> dict:
+    """Toggle the demo seat enricher by setting the retained control flag.
+
+    mock_sensors.py listens on this topic and starts/stops adding the five
+    simulated seats to library/state. No SSH or sudo needed.
+    """
+    app.state.mqtt.publish("library/control/mockseats",
+                           "on" if on else "off", retain=True)
+    latest["mockseats"] = on
+    return {"mockseats": on}
 
 
 @app.websocket("/ws")
